@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String   @id @default(uuid())
+  name String
+  email    String   @unique
+  hashedPassword String
+  role          RoleEnum
+  profileImage  String?
+  assignedClients Client[]
+  relatedEvents AppEvents[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum RoleEnum {
+  USER
+  MANAGER
+  ADMIN
+}
+
+model Client {
+  id            String      @id @default(uuid())
+  name          String
+  email         String
+  phone         String
+  lead String
+  clientPhase String
+  assignedUser User? @relation(fields: [assignedUserId], references: [id])
+  assignedUserId String?
+  interestedVehicles Vehicle[] @relation("InterestedVehicles")
+  ownedVehicles Vehicle[] @relation("OwnedVehicles")
+  clientEvents String[]
+  lastAccessed DateTime?
+  assignedDate DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+} 
+
+model AppEvents {
+  id String @id @default(uuid())
+  description String
+  relatedParties User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Vehicle {
+  vinId String @id
+  make String
+  model String
+  year Int
+  color String
+  price Int
+  ownedBy Client? @relation("OwnedVehicles", fields: [clientOwnerId], references: [id])
+  clientOwnerId String?
+  interestedBy Client[] @relation("InterestedVehicles")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
